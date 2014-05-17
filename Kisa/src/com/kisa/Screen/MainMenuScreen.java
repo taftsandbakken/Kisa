@@ -5,12 +5,18 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
@@ -21,22 +27,26 @@ public class MainMenuScreen implements Screen {
 	
 	KisaGame game;
 	
-//	OrthographicCamera camera;
-//	SpriteBatch batch;
+	OrthographicCamera camera;
 	SpriteBatch batch;
 	BitmapFont font;
+	Texture texture;
 	
 	Stage stage;
 	Label titleLabel;
 	TextButton newGameButton;
 	TextButton quitButton;
 	TextButtonStyle textButtonStyle;
+	Sprite sprite;
 	
 	public MainMenuScreen(KisaGame game, String title) {
 		this.game = game;
 		
-//		camera = new OrthographicCamera();
-//      camera.setToOrtho(false, 800, 600);
+		float w = Gdx.graphics.getWidth();
+		float h = Gdx.graphics.getHeight();
+		
+		camera = new OrthographicCamera(1, h/w);
+//		camera.setToOrtho(false, 800, 600);
 		batch = new SpriteBatch();
 		font = new BitmapFont();
 		
@@ -46,20 +56,17 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-//		super.render(delta);
 		stage.act(delta);
-//		batch.setProjectionMatrix(camera.combined);
+		batch.setProjectionMatrix(camera.combined);
         batch.begin();
-//        font.draw(batch, "Hello World", 400, 300);
         stage.draw();
         batch.end();
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -71,19 +78,16 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void hide() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void pause() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void resume() {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -95,8 +99,22 @@ public class MainMenuScreen implements Screen {
 	}
 	
 	public void addActors() {
+		Skin skin = new Skin();
 		font = new BitmapFont();
 //		font.setColor(Color.RED);
+		
+		Texture.setEnforcePotImages(false);
+		texture = new Texture(Gdx.files.internal("data/Shirt2.bmp")); //libgdx.png  Shirt2.bmp   KISAonroadtodragons.jpg
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		
+		TextureRegion region = new TextureRegion(texture, -80, -10, 800, 600); //512, 275
+		
+		sprite = new Sprite(region);
+		sprite.setSize(1.1f, 1.1f * sprite.getHeight() / sprite.getWidth());
+		sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
+		sprite.setPosition((float)(-sprite.getWidth()/2.5), (float)(-sprite.getHeight()/1.8));
+		
+		Image background = new Image(sprite);
 		
 		LabelStyle labelStyle = new LabelStyle();
 		labelStyle.font = font;
@@ -105,23 +123,25 @@ public class MainMenuScreen implements Screen {
 		titleLabel.setPosition(385, 550);
 		titleLabel.setAlignment(Align.center);
 		
-		textButtonStyle = new TextButtonStyle();
-//		textButtonStyle.up = 
+		textButtonStyle = new TextButtonStyle();  //skin.get("bigButton", TextButtonStyle.class);
 		textButtonStyle.font = font;
 		
 		newGameButton = new TextButton("New Game", textButtonStyle);
-		newGameButton.setPosition(350, 400);
+		newGameButton.setPosition(350, 30);
 		newGameButton.setHeight(50);
 		newGameButton.setWidth(100);
+		//newGameButton.setColor(Color.BLACK);
 		
 		quitButton = new TextButton("Quit", textButtonStyle);
 		quitButton.setPosition(350, 350);
 		quitButton.setHeight(50);
 		quitButton.setWidth(100);
 		
-		stage.addActor(titleLabel);
+		stage.addActor(background);
+		//commented because the background pic has a title
+		//stage.addActor(titleLabel);
 		stage.addActor(newGameButton);
-		stage.addActor(quitButton);
+		//stage.addActor(quitButton);
 		
 		addActionListeners();
 	}
@@ -132,13 +152,13 @@ public class MainMenuScreen implements Screen {
 			public void changed(ChangeEvent event, Actor actor) {
 				System.out.println("clicked!");
 				game.setScreen(game.gameScreen);
-//				dispose();
 			}
 		});
 	
 		quitButton.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
+				//make a confirmation dialog here
 				System.out.println("Exiting");
 				Gdx.app.exit();
 				//game.setScreen(game.gameOverScreen);
