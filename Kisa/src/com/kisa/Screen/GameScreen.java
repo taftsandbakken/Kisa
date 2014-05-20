@@ -1,13 +1,19 @@
 package com.kisa.Screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
@@ -21,6 +27,7 @@ public class GameScreen implements Screen, InputProcessor {
 
 	KisaGame game;
 	
+	OrthographicCamera camera;
 	SpriteBatch batch;
 	BitmapFont font;
 	
@@ -32,6 +39,8 @@ public class GameScreen implements Screen, InputProcessor {
 	public GameScreen(KisaGame game, String title) {
 		this.game = game;
 		
+//		camera = new OrthographicCamera();
+//      camera.setToOrtho(false, 800, 480);
 		batch = new SpriteBatch();
 		font = new BitmapFont();
 		
@@ -41,8 +50,24 @@ public class GameScreen implements Screen, InputProcessor {
 	
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		
+		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+            game.kisa.moveLeft();
+		}
+        if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+            game.kisa.moveRight();
+        }
+        if (Gdx.input.isKeyPressed(Keys.SPACE)) {
+            //Not yet implemented
+        	game.kisa.moveJump();
+        }
+        //I think Dave said that sliding was the other functionality of Kisa
+//        if (Gdx.input.isKeyPressed(Keys.Z)) {
+//            game.kisa.moveSlide();
+//        }
+        
 		stage.act(delta);
 //		batch.setProjectionMatrix(camera.combined);
         batch.begin();
@@ -57,7 +82,6 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void show() {
-		System.out.println("show game");
 		Gdx.input.setInputProcessor(stage);
 	}
 
@@ -103,8 +127,11 @@ public class GameScreen implements Screen, InputProcessor {
 		mainMenuButton.setHeight(50);
 		mainMenuButton.setWidth(100);
 		
+		Texture.setEnforcePotImages(false);
+		
 		stage.addActor(titleLabel);
 		stage.addActor(mainMenuButton);
+		stage.addActor(game.kisa.getKisaImage());
 		
 		addActionListeners();
 	}

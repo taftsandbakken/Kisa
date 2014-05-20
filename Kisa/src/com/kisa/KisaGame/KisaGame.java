@@ -23,6 +23,8 @@ public class KisaGame extends Game {
 	public MainMenuScreen mainMenuScreen;
 	public GameScreen gameScreen;
 	
+	public Kisa kisa;
+	
 	
 	@Override
 	public void create() {
@@ -44,10 +46,13 @@ public class KisaGame extends Game {
 //		sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
 //		sprite.setPosition(-sprite.getWidth()/2, -sprite.getHeight()/2);
 		
-		gameScreen = new GameScreen(this, "Kisa");
-		mainMenuScreen = new MainMenuScreen(this, "Main Menu");
+		kisa = new Kisa(380, 200);
 		
-		setScreen(mainMenuScreen);
+		mainMenuScreen = new MainMenuScreen(this, "Main Menu");
+		gameScreen = new GameScreen(this, "Kisa");
+		
+		
+		setScreen(gameScreen); //mainMenuScreen
 	}
 
 	@Override
