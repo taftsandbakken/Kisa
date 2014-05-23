@@ -7,7 +7,7 @@ public class Main {
 	public static void main(String[] args) {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "Kisa";
-		cfg.useGL20 = false;
+//		cfg.disableAudio = false;
 		cfg.width = 800;
 		cfg.height = 600;
 		

@@ -34,7 +34,7 @@ public class Kisa {
 	
 	
 	public Kisa(int x, int y) {
-		Texture.setEnforcePotImages(false);
+//		Texture.setEnforcePotImages(false);
 		kisaTexture = new Texture(Gdx.files.internal("data/kisa.png"));
 //		kisaTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		TextureRegion kisaRegion = new TextureRegion(kisaTexture, 0, 0, 400, 400);

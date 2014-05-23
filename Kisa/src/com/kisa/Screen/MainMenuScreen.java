@@ -3,7 +3,8 @@ package com.kisa.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.GL20;
+//import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -38,6 +39,7 @@ public class MainMenuScreen implements Screen {
 	TextButton quitButton;
 	TextButtonStyle textButtonStyle;
 	Sprite sprite;
+	Skin uiSkin;
 	
 	public MainMenuScreen(KisaGame game, String title) {
 		this.game = game;
@@ -57,7 +59,7 @@ public class MainMenuScreen implements Screen {
 	@Override
 	public void render(float delta) {
 		Gdx.gl.glClearColor(1, 1, 1, 1);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act(delta);
 		batch.setProjectionMatrix(camera.combined);
         batch.begin();
@@ -98,11 +100,11 @@ public class MainMenuScreen implements Screen {
 	}
 	
 	public void addActors() {
-		Skin skin = new Skin();
+		uiSkin = new Skin(Gdx.files.internal("data/uiskin.json"));
 		font = new BitmapFont();
 //		font.setColor(Color.RED);
 		
-		Texture.setEnforcePotImages(false);
+//		Texture.setEnforcePotImages(false);
 		texture = new Texture(Gdx.files.internal("data/Shirt2.bmp")); //libgdx.png  Shirt2.bmp   KISAonroadtodragons.jpg
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
@@ -118,20 +120,20 @@ public class MainMenuScreen implements Screen {
 		LabelStyle labelStyle = new LabelStyle();
 		labelStyle.font = font;
 		
-		titleLabel = new Label("Kisa", labelStyle);
+		titleLabel = new Label("Kisa", uiSkin);
 		titleLabel.setPosition(385, 550);
 		titleLabel.setAlignment(Align.center);
 		
 		textButtonStyle = new TextButtonStyle();  //skin.get("bigButton", TextButtonStyle.class);
 		textButtonStyle.font = font;
 		
-		newGameButton = new TextButton("New Game", textButtonStyle);
+		newGameButton = new TextButton("New Game", uiSkin);
 		newGameButton.setPosition(350, 30);
-		newGameButton.setHeight(50);
+		newGameButton.setHeight(30);
 		newGameButton.setWidth(100);
 		//newGameButton.setColor(Color.BLACK);
 		
-		quitButton = new TextButton("Quit", textButtonStyle);
+		quitButton = new TextButton("Quit", uiSkin);
 		quitButton.setPosition(350, 350);
 		quitButton.setHeight(50);
 		quitButton.setWidth(100);

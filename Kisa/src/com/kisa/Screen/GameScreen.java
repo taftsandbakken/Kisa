@@ -4,7 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Color;
+//import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -15,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
@@ -23,7 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.kisa.KisaGame.KisaGame;
 
-public class GameScreen implements Screen, InputProcessor {
+public class GameScreen implements Screen {
 
 	KisaGame game;
 	
@@ -35,6 +38,7 @@ public class GameScreen implements Screen, InputProcessor {
 	Label titleLabel;
 	TextButton mainMenuButton;
 	TextButtonStyle textButtonStyle;
+	Skin uiSkin;
 	
 	public GameScreen(KisaGame game, String title) {
 		this.game = game;
@@ -51,7 +55,7 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public void render(float delta) {
 		Gdx.gl.glClearColor(1, 1, 1, 1);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
             game.kisa.moveLeft();
@@ -108,26 +112,29 @@ public class GameScreen implements Screen, InputProcessor {
 	}
 
 	public void addActors() {
+		uiSkin = new Skin(Gdx.files.internal("data/uiskin.json"));
 		font = new BitmapFont();
 //		font.setColor(Color.RED);
 		
 		LabelStyle labelStyle = new LabelStyle();
 		labelStyle.font = font;
 		
-		titleLabel = new Label("Kisa Game Screen", labelStyle);
+		titleLabel = new Label("Kisa Game Screen", uiSkin);
 		titleLabel.setPosition(345, 550);
 		titleLabel.setAlignment(Align.center);
+		titleLabel.setColor(Color.BLACK);
+		titleLabel.setFontScale(2);
 		
 		textButtonStyle = new TextButtonStyle();
 //		textButtonStyle.up = 
 		textButtonStyle.font = font;
 		
-		mainMenuButton = new TextButton("Main Menu", textButtonStyle);
-		mainMenuButton.setPosition(50, 550);
-		mainMenuButton.setHeight(50);
-		mainMenuButton.setWidth(100);
+		mainMenuButton = new TextButton("Main Menu", uiSkin);
+		mainMenuButton.setPosition(20, 550);
+		mainMenuButton.setHeight(30);
+		mainMenuButton.setWidth(95);
 		
-		Texture.setEnforcePotImages(false);
+//		Texture.setEnforcePotImages(false);
 		
 		stage.addActor(titleLabel);
 		stage.addActor(mainMenuButton);
@@ -140,57 +147,8 @@ public class GameScreen implements Screen, InputProcessor {
 		mainMenuButton.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				System.out.println("clicked!");
 				game.setScreen(game.mainMenuScreen);
 			}
 		});
-	}
-
-	@Override
-	public boolean keyDown(int keycode) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean keyUp(int keycode) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean keyTyped(char character) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean mouseMoved(int screenX, int screenY) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean scrolled(int amount) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 }
