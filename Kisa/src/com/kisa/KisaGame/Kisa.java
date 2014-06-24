@@ -1,7 +1,10 @@
 package com.kisa.KisaGame;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -13,10 +16,12 @@ public class Kisa {
 	private Image kisaImage;
 	
 	private int dir = 1; //1 == right, -1 == left
-	private float width = 100;
-	private float height = 100;
+	private float width = 75;
+	private float height = 75;
 	private float x;
 	private float y;
+	
+	private Animations animations;
 	
 	//experimental:
 	Vector2 position = new Vector2();
@@ -26,7 +31,7 @@ public class Kisa {
 	State state = State.IDLE;
 	
 	public enum State{
-		IDLE, WALKING, JUMPING, DEAD
+		IDLE, RUNNING, JUMPING, DEAD
 	}
 	private float maxJumpHeight = 200;
 	private float speed = 200;
@@ -34,43 +39,65 @@ public class Kisa {
 	
 	
 	public Kisa(int x, int y) {
-//		Texture.setEnforcePotImages(false);
-		kisaTexture = new Texture(Gdx.files.internal("data/kisa.png"));
-//		kisaTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		TextureRegion kisaRegion = new TextureRegion(kisaTexture, 0, 0, 400, 400);
-		kisaImage = new Image(kisaRegion);
-		kisaImage.setHeight(height);
-		kisaImage.setWidth(width);
-		kisaImage.setX(x);
-		kisaImage.setY(y);
-//		kisaImage.
-		
 		this.x = x;
 		this.y = y;
+		
+		animations = new Animations();
+		animations.getCurrent().setPosition(x, y);
 		
 		//experimental:
 		this.bounds.height = height;
 		this.bounds.width = width;
 	}
 	
-	public void moveLeft(){
+	public void move() {
+		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+            moveLeft();
+		}
+		else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+            moveRight();
+        }
+		//I think Dave said that jumping and sliding was the other functionality of Kisa
+//		else if(Gdx.input.isKeyPressed(Keys.SPACE)) {
+//            //Not yet implemented
+//			moveJump();
+//        }
+//        else if (Gdx.input.isKeyPressed(Keys.Z)) {
+//            moveSlide();
+//        }
+		else {
+			idle();
+		}
+	}
+	
+	public void moveLeft() {
+        state = State.RUNNING;
 		setX(getX() - speed * Gdx.graphics.getDeltaTime());
 		if(getDir() == 1)
 			setX(getX() + 100);
         setDir(-1);
-        kisaImage.setWidth(width * dir);
+        getCurrentAnimatedImage().setWidth(Math.abs(getCurrentAnimatedImage().getWidth()) * dir);
+        getCurrentAnimatedImage().setAnimation(animations.getRunAnimation());
 	}
 	
-	public void moveRight(){
+	public void moveRight() {
+        state = State.RUNNING;
 		setX(getX() + speed * Gdx.graphics.getDeltaTime());
 		if(getDir() == -1)
 			setX(getX() - 100);
         setDir(1);
-        kisaImage.setWidth(width * dir);
+        getCurrentAnimatedImage().setWidth(Math.abs(getCurrentAnimatedImage().getWidth()) * dir);
+        getCurrentAnimatedImage().setAnimation(animations.getRunAnimation());
 	}
 	
-	public void moveJump(){
-//		System.out.println("Jump!");
+	public void moveJump() {
+		
+		state = State.JUMPING;
+	}
+	
+	public void idle() {
+		getCurrentAnimatedImage().setAnimation(animations.getIdleAnimation());
+		state = State.IDLE;
 	}
 	
 	public Texture getKisaTexture() {
@@ -89,6 +116,14 @@ public class Kisa {
 		this.kisaImage = kisaImage;
 	}
 	
+//	public Sprite getKisaRunningSprite() {
+//		return kisaRunningSprite;
+//	}
+//
+//	public void setKisaRunningSprite(Sprite kisaRunningSprite) {
+//		this.kisaRunningSprite = kisaRunningSprite;
+//	}
+
 	public int getDir() {
 		return dir;
 	}
@@ -103,7 +138,7 @@ public class Kisa {
 
 	public void setX(float x) {
 		this.x = x;
-		kisaImage.setX(x);
+		getCurrentAnimatedImage().setX(x);
 	}
 
 	public float getY() {
@@ -114,4 +149,18 @@ public class Kisa {
 		this.y = y;
 		kisaImage.setY(y);
 	}
+
+	public AnimatedImage getCurrentAnimatedImage() {
+		return animations.getCurrent();
+	}
+
+	public Animations getAnimations() {
+		return animations;
+	}
+
+	public void setAnimations(Animations animations) {
+		this.animations = animations;
+	}
+	
+	
 }
