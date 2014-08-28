@@ -2,9 +2,7 @@ package com.kisa.Screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-//import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -32,6 +30,8 @@ public class MainMenuScreen implements Screen {
 	SpriteBatch batch;
 	BitmapFont font;
 	Texture texture;
+	float screenW = Gdx.graphics.getWidth();
+	float screenH = Gdx.graphics.getHeight();
 	
 	Stage stage;
 	Label titleLabel;
@@ -44,10 +44,7 @@ public class MainMenuScreen implements Screen {
 	public MainMenuScreen(KisaGame game, String title) {
 		this.game = game;
 		
-		float w = Gdx.graphics.getWidth();
-		float h = Gdx.graphics.getHeight();
-		
-		camera = new OrthographicCamera(1, h/w);
+		camera = new OrthographicCamera(1, screenH / screenW);
 //		camera.setToOrtho(false, 800, 600);
 		batch = new SpriteBatch();
 		font = new BitmapFont();
@@ -121,28 +118,27 @@ public class MainMenuScreen implements Screen {
 		labelStyle.font = font;
 		
 		titleLabel = new Label("Kisa", uiSkin);
-		titleLabel.setPosition(385, 550);
+		titleLabel.setSize(screenW * 0.3f, screenH * 0.1f);
+		titleLabel.setPosition(screenW / 2 - titleLabel.getWidth() / 2, screenH * 0.9f);
 		titleLabel.setAlignment(Align.center);
 		
 		textButtonStyle = new TextButtonStyle();  //skin.get("bigButton", TextButtonStyle.class);
 		textButtonStyle.font = font;
 		
 		newGameButton = new TextButton("New Game", uiSkin);
-		newGameButton.setPosition(350, 30);
-		newGameButton.setHeight(30);
-		newGameButton.setWidth(100);
+		newGameButton.setSize(screenW * 0.2f, screenH * 0.1f);
+		newGameButton.setPosition(screenW / 2 - newGameButton.getWidth() / 2, screenH * 0.65f);
 		//newGameButton.setColor(Color.BLACK);
 		
 		quitButton = new TextButton("Quit", uiSkin);
-		quitButton.setPosition(350, 350);
-		quitButton.setHeight(50);
-		quitButton.setWidth(100);
+		quitButton.setSize(screenW * 0.2f, screenH * 0.1f);
+		quitButton.setPosition(screenW / 2 - quitButton.getWidth() / 2, screenH * 0.5f);
 		
 		stage.addActor(background);
 		//commented because the background pic has a title
 		//stage.addActor(titleLabel);
 		stage.addActor(newGameButton);
-		//stage.addActor(quitButton);
+		stage.addActor(quitButton);
 		
 		addActionListeners();
 	}

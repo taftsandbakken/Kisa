@@ -1,39 +1,33 @@
 package com.kisa.Screen;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Color;
-//import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.kisa.KisaGame.KisaGame;
+import com.kisa.KisaGame.World;
 
 public class GameScreen implements Screen {
 
 	KisaGame game;
+	World world;
 	
 	OrthographicCamera camera;
 	SpriteBatch batch;
 	BitmapFont font;
+	float screenW = Gdx.graphics.getWidth();
+	float screenH = Gdx.graphics.getHeight();
 	
 	Stage stage;
 	Label titleLabel;
@@ -45,9 +39,12 @@ public class GameScreen implements Screen {
 	
 	public GameScreen(KisaGame game, String title) {
 		this.game = game;
+		world = this.game.world;
 		
-//		camera = new OrthographicCamera();
-//      camera.setToOrtho(false, 800, 480);
+		camera = new OrthographicCamera();
+		camera.setToOrtho(false, 30, 20);
+		camera.update();
+		
 		batch = new SpriteBatch();
 		font = new BitmapFont();
 		
@@ -59,14 +56,24 @@ public class GameScreen implements Screen {
 	public void render(float delta) {
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		float deltaTime = Gdx.graphics.getDeltaTime();
 		
-		game.kisa.move();
+		world.kisa.update(deltaTime);
 		
-		stage.act(delta);
-//		batch.setProjectionMatrix(camera.combined);
-        batch.begin();
-        stage.draw();
-        batch.end();
+		camera.position.x = world.kisa.position.x;
+		camera.update();
+		
+		world.getRenderer().setView(camera);
+		world.getRenderer().render();
+ 
+		// render the kisa
+		world.renderKisa(deltaTime);
+		
+//		stage.act(delta);
+//		//batch.setProjectionMatrix(camera.combined);
+//        batch.begin();
+//        stage.draw();
+//        batch.end();
 	}
 
 	@Override
@@ -109,29 +116,23 @@ public class GameScreen implements Screen {
 		LabelStyle labelStyle = new LabelStyle();
 		labelStyle.font = font;
 		
-		titleLabel = new Label("Kisa Game Screen", uiSkin);
-		titleLabel.setPosition(345, 550);
-		titleLabel.setAlignment(Align.center);
-		titleLabel.setColor(Color.BLACK);
-		titleLabel.setFontScale(2);
+//		titleLabel = new Label("Kisa Game Screen", uiSkin);
+//		titleLabel.setPosition(345, 550);
+//		titleLabel.setAlignment(Align.center);
+//		titleLabel.setColor(Color.BLACK);
+//		titleLabel.setFontScale(2);
 		
 		textButtonStyle = new TextButtonStyle();
-//		textButtonStyle.up = 
 		textButtonStyle.font = font;
 		
 		mainMenuButton = new TextButton("Main Menu", uiSkin);
-		mainMenuButton.setPosition(20, 550);
-		mainMenuButton.setHeight(30);
-		mainMenuButton.setWidth(95);
+		mainMenuButton.setSize(screenW * 0.1f, screenH * 0.05f);
+		mainMenuButton.setPosition(screenW * 0.9f, screenH * 0.9f);
 		
-//		Texture.setEnforcePotImages(false);
-		
-		stage.addActor(titleLabel);
+//		stage.addActor(titleLabel);
 		stage.addActor(mainMenuButton);
 
-		stage.addActor(game.kisa.getCurrentAnimatedImage());
-//		stage.addActor(game.kisa.getAnimations().getRun());
-//		stage.addActor(game.kisa.getAnimations().getIdle());
+//		stage.addActor(world.kisa.getCurrentAnimatedImage());
 		
 		addActionListeners();
 	}

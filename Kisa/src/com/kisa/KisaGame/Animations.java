@@ -12,15 +12,12 @@ public class Animations {
 	private Animation idleAnimation;
 	private AnimatedImage current;
 	private float speed = .125f;
-	private float width = 100;
-	private float height = 100;
 	
 	private FileHandle RUNNING_SPRITE_FILE = Gdx.files.internal("data/kisaRunning2.png");
 	private FileHandle IDLE_SPRITE_FILE = Gdx.files.internal("data/kisaIdle2.png");
 	
 	Animations() {
 		createAnimations();
-//		current = idle;
 	}
 	
 	public void createAnimations(){
@@ -28,7 +25,7 @@ public class Animations {
 		idleAnimation = createIdleAnimation(IDLE_SPRITE_FILE, 4, 4);
 		
 		current = new AnimatedImage(idleAnimation);
-		current.setSize(width, height);
+		current.setSize(Kisa.WIDTH, Kisa.HEIGHT);
 	}
 	
 	//Not the best practice, but I wanted the idle to look better for now
@@ -57,6 +54,9 @@ public class Animations {
                 walkFrames[index++] = tmp[i][j];
             }
         }
+		Kisa.WIDTH = walkFrames[0].getRegionWidth();
+		Kisa.HEIGHT = walkFrames[0].getRegionHeight(); //1 / 16f * 
+		
         Animation animation = new Animation(speed, walkFrames);
         return animation;
 	}
@@ -92,6 +92,5 @@ public class Animations {
 	public void setIdleAnimation(Animation idleAnimation) {
 		this.idleAnimation = idleAnimation;
 	}
-	
 	
 }
