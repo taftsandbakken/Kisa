@@ -11,6 +11,6 @@ public class Main {
 		cfg.width = 800;
 		cfg.height = 600;
 		
-		new LwjglApplication(new KisaGame(), cfg);
+		new LwjglApplication(new KisaGame(false), cfg);
 	}
 }

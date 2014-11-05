@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.kisa.KisaGame.Data;
 import com.kisa.KisaGame.KisaGame;
 
 public class MainMenuScreen implements Screen {
@@ -97,12 +98,12 @@ public class MainMenuScreen implements Screen {
 	}
 	
 	public void addActors() {
-		uiSkin = new Skin(Gdx.files.internal("data/uiskin.json"));
+		uiSkin = new Skin(Data.UI_SKIN_FILE);
 		font = new BitmapFont();
 //		font.setColor(Color.RED);
 		
 //		Texture.setEnforcePotImages(false);
-		texture = new Texture(Gdx.files.internal("data/Shirt2.bmp")); //libgdx.png  Shirt2.bmp   KISAonroadtodragons.jpg
+		texture = new Texture(Gdx.files.internal(Data.SHIRT_TWO_FILE)); //libgdx.png  Shirt2.bmp   KISAonroadtodragons.jpg
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
 		TextureRegion region = new TextureRegion(texture, -80, -10, 800, 600); //512, 275

@@ -7,17 +7,19 @@ public class KisaGame extends Game {
 
 	public MainMenuScreen mainMenuScreen;
 	public GameScreen gameScreen;
-	//public GameOverScreen gameOverScreen;
 	
-	public World world;
+	public GameHub gameHub;
+	public boolean showDPad;
+	
+	public KisaGame(boolean showDPad) {
+		this.showDPad = showDPad;
+	}
 	
 	@Override
 	public void create() {
-		world = new World();
-		
+		gameHub = new GameHub(this);
 		mainMenuScreen = new MainMenuScreen(this, "Main Menu");
-		gameScreen = new GameScreen(this, "Kisa");
-		
+		gameScreen = new GameScreen(this, "Kisa", showDPad);
 		setScreen(gameScreen);
 	}
 

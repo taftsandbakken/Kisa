@@ -11,8 +11,12 @@ public class MainActivity extends AndroidApplication {
         super.onCreate(savedInstanceState);
         
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
+        cfg.hideStatusBar = true;
+        cfg.useAccelerometer = false;
+        cfg.useCompass = false;
+        cfg.useWakelock = true;
         //cfg.useGL20 = false;
         
-        initialize(new KisaGame(), cfg);
+        initialize(new KisaGame(true), cfg);
     }
 }

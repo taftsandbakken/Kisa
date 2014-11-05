@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.math.Rectangle;
@@ -19,12 +20,13 @@ public class Kisa {
 	public final static int RIGHT = 1;
 	static float WIDTH = 100;
 	static float HEIGHT = 100;
-	private static float MAX_VELOCITY = 10f;
-	private static float JUMP_VELOCITY = 40f;
+	private static float MAX_VELOCITY_WALKING = 8f;  //orig: 12f
+	private static float MAX_VELOCITY_RUNNING = 12f;
+	private float currentMaxVelocity = MAX_VELOCITY_WALKING;
+	private static float JUMP_VELOCITY = 40f;  //orig: 40f
 	private static float DAMPING = 0.87f;
-	private static final float GRAVITY = -2.5f;
-//	private final float maxJumpHeight = 200;
-//	private final float jumpSpeed = 100;
+	private static final float GRAVITY = -2.0f;  //orig: -2.5f
+	private static final float CLIFF_Y_LIMIT = -10;
 	public enum State{
 		IDLE, RUNNING, JUMPING, SLIDING, DEAD
 	}
@@ -58,20 +60,17 @@ public class Kisa {
 //		animations = new Animations();
 //		animations.getCurrent().setPosition(x, y);
 		
-		// load the koala frames, split them, and assign them to Animations
-		int colNum = 4, rowNum = 4;
-		kisaTexture = new Texture("data/kisaRunning.png");
-		TextureRegion[][] regions = TextureRegion.split(kisaTexture, kisaTexture.getWidth()/colNum, kisaTexture.getHeight()/rowNum);
+		// load the kisa frames, split them, and assign them to Animations
+		kisaTexture = new Texture(Data.KISA_SPRITE_FILE);
+		TextureRegion[][] regions = TextureRegion.split(kisaTexture, kisaTexture.getWidth()/Data.KISA_SPRITE_COL_NUM, kisaTexture.getHeight()/Data.KISA_SPRITE_ROW_NUM);
 		stand = new Animation(0, regions[0][0]);
 		jump = new Animation(0, regions[0][1]);
-		TextureRegion[] walkFrames = {regions[0][0], regions[0][1], regions[0][2], regions[0][3], 
-		              				regions[1][0], regions[1][1], regions[1][2], regions[1][3], 
-		            				regions[2][0], regions[2][1]};
+		TextureRegion[] walkFrames = {regions[0][0], regions[0][1], regions[0][2], regions[0][3],
+				regions[0][4], regions[0][5], regions[0][6], regions[0][7]};
 		walk = new Animation(0.15f, walkFrames);
-//		walk.setPlayMode(Animation.LOOP_PINGPONG);
  
-		// figure out the width and height of the koala for collision
-		// detection and rendering by converting a koala frames pixel
+		// figure out the width and height of the kisa for collision
+		// detection and rendering by converting a kisa frames pixel
 		// size into world units (1 unit == 16 pixels)
 		WIDTH = 1 / 85f * regions[0][0].getRegionWidth();
 		HEIGHT = 1 / 85f * regions[0][0].getRegionHeight();
@@ -79,52 +78,115 @@ public class Kisa {
 		position.set(20, 20);
 	}
 	
-	public void update(float deltaTime) {
-		stateTime += deltaTime;
+	public void update(float deltaTime, boolean goLeft, boolean goRight, boolean goRun, boolean goUp) {
+		if(checkForDeath())
+			return;
 		
-		// check input and apply to velocity & state
-		if((Gdx.input.isKeyPressed(Keys.SPACE) || isTouched(0.75f, 1)) && grounded) {
+		stateTime += deltaTime;
+		checkInput(goLeft, goRight, goRun, goUp);
+		
+		updatePosition(deltaTime);
+	}
+	
+	// check input and apply to velocity & state
+	public void checkInput(boolean goLeft, boolean goRight, boolean goRun, boolean goUp) {
+		currentMaxVelocity = MAX_VELOCITY_WALKING;
+		if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT) || goRun)
+			currentMaxVelocity = MAX_VELOCITY_RUNNING;
+		if((Gdx.input.isKeyPressed(Keys.SPACE) || goUp) && grounded) {  //isTouched(0.75f, 1)
 			moveJump();
         }
-		else if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A) || isTouched(0, 0.25f)) {
+		else if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A) || goLeft) {  //isTouched(0, 0.25f)
 			moveLeftOrRight(LEFT);
 		}
-		else if (Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.D) || isTouched(0.25f, 0.5f)) {
+		else if (Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.D) || goRight) {  //isTouched(0.25f, 0.5f)
 			moveLeftOrRight(RIGHT);
-        }		
-//        else if (Gdx.input.isKeyPressed(Keys.Z)) {
-//            moveSlide();
-//        }
-//		else {
-//			idle();
-//		}
+        }
+	}
+	
+	public void moveLeftOrRight(int newDir) {
+		velocity.x = newDir * currentMaxVelocity;
+		if (grounded)
+			state = State.RUNNING;
 		
+		//setX(getX() + (newDir * speed) * Gdx.graphics.getDeltaTime());
+//		if(newDir != dir) //this is used to fix the x value when the image flips
+//			setX(getX() - (newDir * WIDTH));
+        setDir(newDir);
+//        getCurrentAnimatedImage().setWidth(Math.abs(getCurrentAnimatedImage().getWidth()) * dir);
+//        getCurrentAnimatedImage().setAnimation(animations.getRunAnimation());
+	}
+	
+	public void moveJump() {
+		//getCurrentAnimatedImage().setAnimation(animations.getJumpAnimation());
+		//System.out.println("y: " + position.y + "  x: " + position.x);
+		state = State.JUMPING;
+		velocity.y += JUMP_VELOCITY;
+		grounded = false;
+	}
+	
+//	private boolean isTouched(float startX, float endX)
+//	{
+//		// check if any finger is touching the area between startX and endX
+//		// startX/endX are given between 0 (left edge of the screen) and 1 (right edge of the screen)
+//		for (int i = 0; i < 2; i++)
+//		{
+//			float x = Gdx.input.getX() / (float) Gdx.graphics.getWidth();
+//			if (Gdx.input.isTouched(i) && (x >= startX && x <= endX))
+//				return true;
+//		}
+//		return false;
+//	}
+	
+	private void updatePosition(float deltaTime) {
 		// apply gravity if we are falling
 		velocity.add(0, GRAVITY);
 		
+		clampVelocity();
+		
+		// multiply by delta time so we know how far we go in this frame
+		velocity.scl(deltaTime);
+		
+		// perform collision detection & response, on each axis, separately
+		Rectangle kisaRect = rectPool.obtain();
+		kisaRect.set(position.x, position.y, WIDTH, HEIGHT);
+		//kisaRect.set(position.x * 0.75f, position.y, WIDTH * 0.6f, HEIGHT); //testing different rect size to take out horse
+		//kisaRect.set(position.x + (0.25f * WIDTH), position.y, WIDTH * 0.75f, HEIGHT); //testing different rect size to take out horse
+
+		collisionDetectionXAxis(kisaRect);
+		collisionDetectionYAxis(kisaRect);
+		rectPool.free(kisaRect);
+ 
+		// unscale the velocity by the inverse delta time and set 
+		// the latest position
+		position.add(velocity);
+		velocity.scl(1 / deltaTime);
+ 
+		// Apply damping to the velocity on the x-axis so we don't
+		// walk infinitely once a key was pressed
+		velocity.x *= DAMPING;
+	}
+	
+	private void clampVelocity() {
 		// clamp the velocity to the maximum, x-axis only
-		if (Math.abs(velocity.x) > MAX_VELOCITY)
-			velocity.x = Math.signum(velocity.x) * MAX_VELOCITY;
+		if (Math.abs(velocity.x) > currentMaxVelocity)
+			velocity.x = Math.signum(velocity.x) * currentMaxVelocity;
 		
 		// clamp the velocity to 0 if it's < 1, and set the state to standign
 		if (Math.abs(velocity.x) < 1) {
 			velocity.x = 0;
 			if (grounded) {
 				state = State.IDLE;
-//				getCurrentAnimatedImage().setAnimation(animations.getIdleAnimation());
+				//getCurrentAnimatedImage().setAnimation(animations.getIdleAnimation());
 			}
 		}
-		
-		// multiply by delta time so we know how far we go in this frame
-		velocity.scl(deltaTime);
-		
-		// perform collision detection & response, on each axis, separately
-		// if Kisa is moving right, check the tiles to the right of it's
-		// right bounding box edge, otherwise check the ones to the left
-		Rectangle kisaRect = rectPool.obtain();
-		kisaRect.set(position.x, position.y, WIDTH, HEIGHT);
-//		kisaRect.set(position.x * 0.75f, position.y, WIDTH * 0.6f, HEIGHT);
-		
+	}
+	
+	/* 
+	 * If Kisa is moving right, check the tiles to the right of it's
+	 * right bounding box edge, otherwise check the ones to the left
+	 */ 
+	private void collisionDetectionXAxis(Rectangle kisaRect) {
 		int startX, startY, endX, endY;
 		if (velocity.x > 0)
 			startX = endX = (int) (position.x + WIDTH + velocity.x);
@@ -142,9 +204,14 @@ public class Kisa {
 			}
 		}
 		kisaRect.x = position.x;
- 
-		// if the koala is moving upwards, check the tiles to the top of it's
-		// top bounding box edge, otherwise check the ones to the bottom
+	}
+	
+	/* 
+	 * If the kisa is moving upwards, check the tiles to the top of it's
+	 * top bounding box edge, otherwise check the ones to the bottom
+	 */ 
+	private void collisionDetectionYAxis(Rectangle kisaRect) {
+		int startX, startY, endX, endY;
 		if (velocity.y > 0)
 			startY = endY = (int) (position.y + HEIGHT + velocity.y);
 		else
@@ -159,9 +226,7 @@ public class Kisa {
 				// so it is just below/above the tile we collided with this removes bouncing :)
 				if (velocity.y > 0)	{
 					position.y = tile.y - HEIGHT;
-					// we hit a block jumping upwards, let's destroy it!
-					TiledMapTileLayer layer = (TiledMapTileLayer) world.getMap().getLayers().get(1);
-					layer.setCell((int) tile.x, (int) tile.y, null);
+					applyCollision(tile);
 				}
 				else {
 					position.y = tile.y + tile.height;
@@ -172,59 +237,30 @@ public class Kisa {
 				break;
 			}
 		}
-		rectPool.free(kisaRect);
- 
-		// unscale the velocity by the inverse delta time and set 
-		// the latest position
-		position.add(velocity);
-		velocity.scl(1 / deltaTime);
- 
-		// Apply damping to the velocity on the x-axis so we don't
-		// walk infinitely once a key was pressed
-		velocity.x *= DAMPING;
 	}
 	
-	public void moveLeftOrRight(int newDir) {
-		velocity.x = newDir * MAX_VELOCITY;
-		if (grounded)
-			state = State.RUNNING;
+	private void applyCollision(Rectangle tile) {
+		TiledMapTileLayer backgroundLayer = (TiledMapTileLayer) world.getMap().getLayers().get(0);
+		TiledMapTileLayer collisionLayer = (TiledMapTileLayer) world.getMap().getLayers().get(1);
 		
-		//setX(getX() + (newDir * speed) * Gdx.graphics.getDeltaTime());
-//		if(newDir != dir) //this is used to fix the x value when the image flips
-//			setX(getX() - (newDir * WIDTH));
-        setDir(newDir);
-//        getCurrentAnimatedImage().setWidth(Math.abs(getCurrentAnimatedImage().getWidth()) * dir);
-//        getCurrentAnimatedImage().setAnimation(animations.getRunAnimation());
+		if(checkForTileProperty(backgroundLayer, tile, "victory"))
+			world.setVictoryFlag(true);
+			
+		if(checkForTileProperty(collisionLayer, tile, "breakable")) // we hit a block jumping upwards, let's destroy it!
+			collisionLayer.setCell((int) tile.x, (int) tile.y, null);
 	}
 	
-	public void moveJump() {
-		//getCurrentAnimatedImage().setAnimation(animations.getJumpAnimation());
-		state = State.JUMPING;
-		velocity.y += JUMP_VELOCITY;
-		grounded = false;
+	private boolean checkForTileProperty(TiledMapTileLayer layer, Rectangle tile, String property) {
+		Object prop = getTileProperty(layer, tile, property);
+		return prop != null && (prop).equals("true");
 	}
 	
-//	public void idle() {
-//		getCurrentAnimatedImage().setAnimation(animations.getIdleAnimation());
-//		state = State.IDLE;
-//	}
-	
-//	public void slide() {
-//		getCurrentAnimatedImage().setAnimation(animations.getSlideAnimation());
-//		state = State.SLIDING;
-//	}
-	
-	private boolean isTouched(float startX, float endX)
-	{
-		// check if any finge is touch the area between startX and endX
-		// startX/endX are given between 0 (left edge of the screen) and 1 (right edge of the screen)
-		for (int i = 0; i < 2; i++)
-		{
-			float x = Gdx.input.getX() / (float) Gdx.graphics.getWidth();
-			if (Gdx.input.isTouched(i) && (x >= startX && x <= endX))
-				return true;
-		}
-		return false;
+	private Object getTileProperty(TiledMapTileLayer layer, Rectangle tile, String property) {
+		Cell cell = layer.getCell((int)tile.getX(), (int)tile.getY());
+		if(cell == null)
+			return null;
+		TiledMapTile tiledTile = cell.getTile();
+		return tiledTile.getProperties().get(property);
 	}
 	
 	private void getTiles(int startX, int startY, int endX, int endY, Array<Rectangle> tiles)
@@ -245,6 +281,49 @@ public class Kisa {
 				}
 			}
 		}
+	}
+	
+	/*
+	 * Based on the Kisa state, get the animation frame
+	 */
+	public TextureRegion getCurrentFrame() {
+		TextureRegion frame = null;
+		switch(getState()) {
+			case RUNNING:
+				frame = getWalk().getKeyFrame(getStateTime(), true);
+				break;
+			case JUMPING:
+				frame = getJump().getKeyFrame(getStateTime());
+				break;
+			default:
+				frame = getStand().getKeyFrame(getStateTime());
+				break;
+		}
+		return frame;
+	}
+	
+	// returns true if Kisa perished foolishly or otherwise
+	public boolean checkForDeath() {
+		if(state == State.DEAD)
+			return true;
+		
+		//check the different ways you can die
+		if(position.y < CLIFF_Y_LIMIT) 
+			state = State.DEAD;
+		//check against enemies and objects of death
+		
+		if(state == State.DEAD) {
+			justDied();
+			return true;
+		}
+		return false;
+	}
+	
+	/*
+	 * Kisa just died
+	 */
+	public void justDied() {
+		world.gameHub.justDied();
 	}
 	
 	public Texture getKisaTexture() {
@@ -347,5 +426,8 @@ public class Kisa {
 		return velocity;
 	}
 	
+	public boolean isDead() {
+		return state == State.DEAD;
+	}
 	
 }
