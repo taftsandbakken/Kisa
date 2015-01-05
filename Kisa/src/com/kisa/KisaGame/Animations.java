@@ -11,7 +11,7 @@ public class Animations {
 	private Animation runAnimation;
 	private Animation idleAnimation;
 	private AnimatedImage current;
-	private float speed = .125f;
+	private float speed = Data.kisaAnimationSpeed;
 	
 	private FileHandle RUNNING_SPRITE_FILE = Gdx.files.internal("data/kisaRunning2.png");
 	private FileHandle IDLE_SPRITE_FILE = Gdx.files.internal("data/kisaIdle2.png");

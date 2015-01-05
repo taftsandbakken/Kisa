@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="20" height="20" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="1" tilewidth="16" tileheight="16">
+  <image source="tileSet.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="257" name="coin0" tilewidth="19" tileheight="19">
+  <image source="0.png" width="190" height="19"/>
+  <tile id="0">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="0"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="1"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="2"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="3"/>
+   </properties>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="4"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="5"/>
+   </properties>
+  </tile>
+  <tile id="6">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="6"/>
+   </properties>
+  </tile>
+  <tile id="7">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="7"/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="8"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="coin" value="true"/>
+    <property name="coin0Frame" value="9"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="background" width="20" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFgx0wMlLfPGqbSQsAcyc2TK55uNjkmIlPDynmwdQScge5bsSlj5JwxKaX0nSFLY5pkfapaRY14mso5EVcAADGswBL
+  </data>
+ </layer>
+ <layer name="collision" width="20" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIKhAfqobNZINI+aGAAKag+J
+  </data>
+ </layer>
+</map>

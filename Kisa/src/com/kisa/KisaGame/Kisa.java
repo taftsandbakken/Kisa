@@ -55,6 +55,9 @@ public class Kisa {
 		}
 	};
 	
+	private TiledMapTileLayer backgroundLayer;
+	private TiledMapTileLayer collisionLayer;
+	
 	public Kisa(World world) {
 		this.world = world;
 //		animations = new Animations();
@@ -75,7 +78,7 @@ public class Kisa {
 		WIDTH = 1 / 85f * regions[0][0].getRegionWidth();
 		HEIGHT = 1 / 85f * regions[0][0].getRegionHeight();
 		
-		position.set(20, 20);
+		position.set(16, 4);
 	}
 	
 	public void update(float deltaTime, boolean goLeft, boolean goRight, boolean goRun, boolean goUp) {
@@ -119,7 +122,6 @@ public class Kisa {
 	
 	public void moveJump() {
 		//getCurrentAnimatedImage().setAnimation(animations.getJumpAnimation());
-		//System.out.println("y: " + position.y + "  x: " + position.x);
 		state = State.JUMPING;
 		velocity.y += JUMP_VELOCITY;
 		grounded = false;
@@ -139,6 +141,11 @@ public class Kisa {
 //	}
 	
 	private void updatePosition(float deltaTime) {
+		if(collisionLayer == null) {
+			backgroundLayer = (TiledMapTileLayer) world.getMap().getLayers().get(0);
+			collisionLayer = (TiledMapTileLayer) world.getMap().getLayers().get(1);	
+		}
+		
 		// apply gravity if we are falling
 		velocity.add(0, GRAVITY);
 		
@@ -155,6 +162,8 @@ public class Kisa {
 
 		collisionDetectionXAxis(kisaRect);
 		collisionDetectionYAxis(kisaRect);
+		backgroundCollisionDetectionYAxis(kisaRect);
+		backgroundCollisionDetectionXAxis(kisaRect);
 		rectPool.free(kisaRect);
  
 		// unscale the velocity by the inverse delta time and set 
@@ -195,11 +204,12 @@ public class Kisa {
 		
 		startY = (int) (position.y);
 		endY = (int) (position.y + HEIGHT);
-		getTiles(startX, startY, endX, endY, world.getTiles());
+		getTiles(startX, startY, endX, endY, world.getTiles(), collisionLayer);
 		kisaRect.x += velocity.x;
 		for (Rectangle tile : world.getTiles())	{
 			if (kisaRect.overlaps(tile)) {
 				velocity.x = 0;
+				applyCollisionBothAxis(tile);
 				break;
 			}
 		}
@@ -218,20 +228,20 @@ public class Kisa {
 			startY = endY = (int) (position.y + velocity.y);
 		startX = (int) (position.x);
 		endX = (int) (position.x + WIDTH);
-		getTiles(startX, startY, endX, endY, world.getTiles());
+		getTiles(startX, startY, endX, endY, world.getTiles(), collisionLayer);
 		kisaRect.y += velocity.y;
 		for (Rectangle tile : world.getTiles()) {
 			if (kisaRect.overlaps(tile)) {
+				applyCollisionBothAxis(tile);
 				// we actually reset the kisa y-position here
 				// so it is just below/above the tile we collided with this removes bouncing :)
 				if (velocity.y > 0)	{
 					position.y = tile.y - HEIGHT;
-					applyCollision(tile);
+					applyCollisionYAxis(tile);
 				}
 				else {
 					position.y = tile.y + tile.height;
-					// if we hit the ground, mark us as grounded so we can jump
-					grounded = true;
+					grounded = true; // if we hit the ground, mark us as grounded so we can jump
 				}
 				velocity.y = 0;
 				break;
@@ -239,42 +249,91 @@ public class Kisa {
 		}
 	}
 	
-	private void applyCollision(Rectangle tile) {
-		TiledMapTileLayer backgroundLayer = (TiledMapTileLayer) world.getMap().getLayers().get(0);
-		TiledMapTileLayer collisionLayer = (TiledMapTileLayer) world.getMap().getLayers().get(1);
-		
-		if(checkForTileProperty(backgroundLayer, tile, "victory"))
+	private void applyCollisionYAxis(Rectangle tile) {
+		if(checkForTileProperty(collisionLayer, tile, "breakable")) { // we hit a block jumping upwards, let's destroy it!
+			collisionLayer.setCell((int)tile.x, (int)tile.y, null);
+		}
+	}
+	
+	private void applyCollisionBothAxis(Rectangle tile) {
+		if(checkForTileProperty(backgroundLayer, tile, "victory")) { //good job, you win
 			world.setVictoryFlag(true);
-			
-		if(checkForTileProperty(collisionLayer, tile, "breakable")) // we hit a block jumping upwards, let's destroy it!
-			collisionLayer.setCell((int) tile.x, (int) tile.y, null);
+		}
+
+		if(checkForTileProperty(collisionLayer, tile, "death")) { // oops, you died
+			justDied();
+		}
+	}
+	
+	/* 
+	 * Check for collisions with the background on the Y axis without affecting movement
+	 */ 
+	private void backgroundCollisionDetectionYAxis(Rectangle kisaRect) {
+		int startX, startY, endX, endY;
+		if (velocity.y > 0)
+			startY = endY = (int) (position.y + HEIGHT + velocity.y);
+		else
+			startY = endY = (int) (position.y + velocity.y);
+		startX = (int) (position.x);
+		endX = (int) (position.x + WIDTH);
+		getTiles(startX, startY, endX, endY, world.getTiles(), backgroundLayer);
+		kisaRect.y += velocity.y;
+		for (Rectangle tile : world.getTiles()) {
+			if (kisaRect.overlaps(tile)) {
+				applyBackgroundCollisionBothAxis(tile);
+			}
+		}
+	}
+	
+	/* 
+	 * Check for collisions with the background on the X axis without affecting movement
+	 */ 
+	private void backgroundCollisionDetectionXAxis(Rectangle kisaRect) {
+		int startX, startY, endX, endY;
+		if (velocity.x > 0)
+			startX = endX = (int) (position.x + WIDTH + velocity.x);
+		else
+			startX = endX = (int) (position.x + velocity.x);
+		startY = (int) (position.y);
+		endY = (int) (position.y + HEIGHT);
+		getTiles(startX, startY, endX, endY, world.getTiles(), backgroundLayer);
+		kisaRect.x += velocity.x;
+		for (Rectangle tile : world.getTiles()) {
+			if (kisaRect.overlaps(tile)) {
+				applyBackgroundCollisionBothAxis(tile);
+			}
+		}
+	}
+	
+	private void applyBackgroundCollisionBothAxis(Rectangle tile) {
+		if(checkForTileProperty(backgroundLayer, tile, "coin")) { // capture the coin
+			backgroundLayer.setCell((int)tile.x, (int)tile.y, null);
+			world.addCoin();
+		}
 	}
 	
 	private boolean checkForTileProperty(TiledMapTileLayer layer, Rectangle tile, String property) {
 		Object prop = getTileProperty(layer, tile, property);
-		return prop != null && (prop).equals("true");
+		return prop != null;// && prop.equals("true");
 	}
 	
 	private Object getTileProperty(TiledMapTileLayer layer, Rectangle tile, String property) {
 		Cell cell = layer.getCell((int)tile.getX(), (int)tile.getY());
 		if(cell == null)
 			return null;
+		
+		
 		TiledMapTile tiledTile = cell.getTile();
 		return tiledTile.getProperties().get(property);
 	}
 	
-	private void getTiles(int startX, int startY, int endX, int endY, Array<Rectangle> tiles)
-	{
-		TiledMapTileLayer layer = (TiledMapTileLayer) world.getMap().getLayers().get(1);
+	private void getTiles(int startX, int startY, int endX, int endY, Array<Rectangle> tiles, TiledMapTileLayer layer) {
 		rectPool.freeAll(tiles);
 		tiles.clear();
-		for (int y = startY; y <= endY; y++)
-		{
-			for (int x = startX; x <= endX; x++)
-			{
+		for (int y = startY; y <= endY; y++) {
+			for (int x = startX; x <= endX; x++) {
 				Cell cell = layer.getCell(x, y);
-				if (cell != null)
-				{
+				if (cell != null) {
 					Rectangle rect = rectPool.obtain();
 					rect.set(x, y, 1, 1);
 					tiles.add(rect);
@@ -309,7 +368,7 @@ public class Kisa {
 		
 		//check the different ways you can die
 		if(position.y < CLIFF_Y_LIMIT) 
-			state = State.DEAD;
+			justDied();
 		//check against enemies and objects of death
 		
 		if(state == State.DEAD) {
@@ -323,6 +382,7 @@ public class Kisa {
 	 * Kisa just died
 	 */
 	public void justDied() {
+		state = State.DEAD;
 		world.gameHub.justDied();
 	}
 	
@@ -429,5 +489,4 @@ public class Kisa {
 	public boolean isDead() {
 		return state == State.DEAD;
 	}
-	
 }

@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.kisa.KisaGame.Assets;
 import com.kisa.KisaGame.Data;
 import com.kisa.KisaGame.KisaGame;
 
@@ -100,20 +101,8 @@ public class MainMenuScreen implements Screen {
 	public void addActors() {
 		uiSkin = new Skin(Data.UI_SKIN_FILE);
 		font = new BitmapFont();
-//		font.setColor(Color.RED);
-		
-//		Texture.setEnforcePotImages(false);
-		texture = new Texture(Gdx.files.internal(Data.SHIRT_TWO_FILE)); //libgdx.png  Shirt2.bmp   KISAonroadtodragons.jpg
-		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		
-		TextureRegion region = new TextureRegion(texture, -80, -10, 800, 600); //512, 275
-		
-		sprite = new Sprite(region);
-		sprite.setSize(1.1f, 1.1f * sprite.getHeight() / sprite.getWidth());
-		sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
-		sprite.setPosition((float)(-sprite.getWidth()/2.5), (float)(-sprite.getHeight()/1.8));
-		
-		Image background = new Image(sprite);
+
+		Image background = Assets.getNewImage(Data.KISA_TITLE_PAGE, Data.SCREEN_W * 0.1f, Data.SCREEN_H * 0.05f, Data.SCREEN_W * 0.8f, Data.SCREEN_H * 0.8f, 170, 173);
 		
 		LabelStyle labelStyle = new LabelStyle();
 		labelStyle.font = font;
@@ -128,12 +117,12 @@ public class MainMenuScreen implements Screen {
 		
 		newGameButton = new TextButton("New Game", uiSkin);
 		newGameButton.setSize(screenW * 0.2f, screenH * 0.1f);
-		newGameButton.setPosition(screenW / 2 - newGameButton.getWidth() / 2, screenH * 0.65f);
+		newGameButton.setPosition(screenW / 3 - newGameButton.getWidth() / 2, screenH * 0.88f);
 		//newGameButton.setColor(Color.BLACK);
 		
 		quitButton = new TextButton("Quit", uiSkin);
 		quitButton.setSize(screenW * 0.2f, screenH * 0.1f);
-		quitButton.setPosition(screenW / 2 - quitButton.getWidth() / 2, screenH * 0.5f);
+		quitButton.setPosition(screenW / 3 * 2 - quitButton.getWidth() / 2, screenH * 0.88f);
 		
 		stage.addActor(background);
 		//commented because the background pic has a title

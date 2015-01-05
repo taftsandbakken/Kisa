@@ -3,8 +3,14 @@ package com.kisa.KisaGame;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileSet;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
+
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
@@ -13,17 +19,20 @@ public class World {
 	private TiledMap map;
 	private OrthogonalTiledMapRenderer renderer;
 	private Array<Rectangle> tiles = new Array<Rectangle>();
+	private Array<StaticTiledMapTile> coin0Tiles;
 	
 	public GameHub gameHub;
 	public Kisa kisa;
 	int level = 1;
 	boolean isPaused;
 	boolean victoryFlag;
+	int coinCount = 0;
 	
 	public World(GameHub gameHub) {
 		this.gameHub = gameHub;
 		kisa = new Kisa(this);
-		loadLevel1();
+		loadLevel();
+		loadAnimations();
 		isPaused = false;
 	}
 	
@@ -39,16 +48,58 @@ public class World {
 		batch.end();
 	}
 	
-	public void loadLevel1(){
+	public void loadLevel(){
 		victoryFlag = false;
-		map = new TmxMapLoader().load(Data.LEVEL_ONE_FILE);
+		String currentLevel = "";
+		switch (level) {
+			case 1: currentLevel = Data.LEVEL_ONE_FILE;
+				break;
+				
+		}
+		map = new TmxMapLoader().load(currentLevel);
 		renderer = new OrthogonalTiledMapRenderer(map, 1 / 16f);
 //		renderer.setView(, 0, 0, Data.SCREEN_W * .9, Data.SCREEN_H * .9);
 	}
 	
 	public void restartLevel() {
 		kisa = new Kisa(this);
-		loadLevel1();
+		loadLevel();
+	}
+	
+	public void loadAnimations() {
+		//load coin 0
+		TiledMapTileSet tileset_coin0 = map.getTileSets().getTileSet("coin0");
+		if(tileset_coin0 == null)
+			return;
+		coin0Tiles = new Array<StaticTiledMapTile>();
+        for(TiledMapTile tile:tileset_coin0){
+            Object property = tile.getProperties().get("coin0Frame");
+            if(property != null) {
+            	coin0Tiles.add(new StaticTiledMapTile(tile.getTextureRegion()));
+            }
+        }
+        loadLevel();
+        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(0);
+        for(int x = 0; x < layer.getWidth(); x++){
+            for(int y = 0; y < layer.getHeight(); y++){
+                TiledMapTileLayer.Cell cell = layer.getCell(x, y);
+                if(cell != null) {
+	                Object property = cell.getTile().getProperties().get("coin0Frame");
+	                if(property != null){
+	                	TiledMapTile tile = new AnimatedTiledMapTile(Data.coinAnimationSpeed, coin0Tiles);
+	                	tile.getProperties().put("coin", "true");
+	                    cell.setTile(tile);
+	                }
+                }
+            }
+        }
+        
+//        loadLevel(); // I don't know why I had to reload the level after the animations were 
+        			 // loaded, but it had to be redone for some wretched reason
+	}
+	
+	public void addCoin() {
+		coinCount++;
 	}
 
 	public TiledMap getMap() {

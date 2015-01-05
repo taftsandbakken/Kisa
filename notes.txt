@@ -7,10 +7,29 @@ http://chrismweb.com/2013/03/27/libgdx-demo-platformer-for-2d-side-scrolling-gam
 
 
 
+List of properties to give tiles in Tiled:
+	MAIN
+		victory: true
+		breakable: true
+		coin: true
+		death: true
+
+	ANIMATIONS
+		coin0Frame: 0...n
+		coin1Frame: 0...n
+		coin2Frame: 0...n
+
+	TO ADD
+		KisaStart: true
 
 
 
-
+Ideas:
+	flashing layer opacity
+		Random rand = new Random();
+	    int randomNum = rand.nextInt((100 - 0) + 1) + 0;
+	    layer.setOpacity(randomNum);
+	    //or increment the opacity till it's 100, then go back to 0. repeat.
 
 
 Old Code:

@@ -13,9 +13,13 @@ public class Data {
 	public static int KISA_SPRITE_ROW_NUM = 1;
 	public static int KISA_SPRITE_COL_NUM = 8;
 	
+	public static float coinAnimationSpeed = 0.075f;
+	public static float kisaAnimationSpeed = .125f;
+	
 	public static FileHandle UI_SKIN_FILE = Gdx.files.internal("data/other/uiskin.json");
 	public static String KISA_SPRITE_FILE = "data/sprites/kisaSprite10.png";
-	public static String SHIRT_TWO_FILE = "data/titles/Shirt2.png";	
+	public static String SHIRT_TWO_FILE = "data/titles/Shirt2.png";
+	public static String KISA_TITLE_PAGE = "data/titles/KisaTitlePg.png";
 	public static String LEVEL_ONE_FILE = "data/tiles/levelTaft.tmx";
 	public static String UI_UP_FILE = "data/ui/arrowUp.png";
 	public static String UI_RIGHT_FILE = "data/ui/arrowRight.png";
