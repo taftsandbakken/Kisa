@@ -65,7 +65,9 @@ public class Kisa {
 		
 		// load the kisa frames, split them, and assign them to Animations
 		kisaTexture = new Texture(Data.KISA_SPRITE_FILE);
-		TextureRegion[][] regions = TextureRegion.split(kisaTexture, kisaTexture.getWidth()/Data.KISA_SPRITE_COL_NUM, kisaTexture.getHeight()/Data.KISA_SPRITE_ROW_NUM);
+		TextureRegion[][] regions = TextureRegion.split(kisaTexture, 
+				kisaTexture.getWidth()/Data.KISA_SPRITE_COL_NUM, 
+				kisaTexture.getHeight()/Data.KISA_SPRITE_ROW_NUM);
 		stand = new Animation(0, regions[0][0]);
 		jump = new Animation(0, regions[0][1]);
 		TextureRegion[] walkFrames = {regions[0][0], regions[0][1], regions[0][2], regions[0][3],
@@ -206,11 +208,19 @@ public class Kisa {
 		endY = (int) (position.y + HEIGHT);
 		getTiles(startX, startY, endX, endY, world.getTiles(), collisionLayer);
 		kisaRect.x += velocity.x;
-		for (Rectangle tile : world.getTiles())	{
+		for(Rectangle tile : world.getTiles())	{
 			if (kisaRect.overlaps(tile)) {
 				velocity.x = 0;
 				applyCollisionBothAxis(tile);
 				break;
+			}
+		}
+		
+		for(Dragon dragon : world.dragons) {
+			Rectangle dragonRect = rectPool.obtain();
+			dragonRect.set(dragon.position.x + 1, dragon.position.y, Dragon.WIDTH - 2, Dragon.HEIGHT - 1);
+			if(kisaRect.overlaps(dragonRect)) {
+				justDied();
 			}
 		}
 		kisaRect.x = position.x;
@@ -245,6 +255,14 @@ public class Kisa {
 				}
 				velocity.y = 0;
 				break;
+			}
+		}
+		
+		for(Dragon dragon : world.dragons) {
+			Rectangle dragonRect = rectPool.obtain();
+			dragonRect.set(dragon.position.x + 1, dragon.position.y, Dragon.WIDTH - 2, Dragon.HEIGHT - 1);
+			if(kisaRect.overlaps(dragonRect)) {
+				justDied();
 			}
 		}
 	}
@@ -321,7 +339,6 @@ public class Kisa {
 		Cell cell = layer.getCell((int)tile.getX(), (int)tile.getY());
 		if(cell == null)
 			return null;
-		
 		
 		TiledMapTile tiledTile = cell.getTile();
 		return tiledTile.getProperties().get(property);

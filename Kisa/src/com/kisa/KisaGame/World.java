@@ -1,5 +1,7 @@
 package com.kisa.KisaGame;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -28,12 +30,22 @@ public class World {
 	boolean victoryFlag;
 	int coinCount = 0;
 	
+	ArrayList<Dragon> dragons;
+	
 	public World(GameHub gameHub) {
 		this.gameHub = gameHub;
 		kisa = new Kisa(this);
 		loadLevel();
 		loadAnimations();
 		isPaused = false;
+	}
+	
+	public void updateAnimations(float deltaTime, boolean goLeft, boolean goRight, boolean goRun, boolean goUp) {
+		kisa.update(deltaTime, goLeft, goRight, goRun, goUp);
+		
+		for(Dragon dragon : dragons) {
+			dragon.update(deltaTime);
+		}
 	}
 	
 	public void renderKisa(float deltaTime) {
@@ -45,6 +57,12 @@ public class World {
 		batch.begin();
 		float x = kisa.getDir() == Kisa.RIGHT ? kisa.position.x : kisa.position.x + Kisa.WIDTH;
 		batch.draw(frame, x, kisa.position.y, Kisa.WIDTH * kisa.getDir(), Kisa.HEIGHT);
+		
+		for(Dragon dragon : dragons) {
+			TextureRegion dragonFrame = dragon.getCurrentFrame();
+			batch.draw(dragonFrame, dragon.position.x, dragon.position.y, Dragon.WIDTH, Dragon.HEIGHT);
+		}
+		
 		batch.end();
 	}
 	
@@ -53,6 +71,7 @@ public class World {
 		String currentLevel = "";
 		switch (level) {
 			case 1: currentLevel = Data.LEVEL_ONE_FILE;
+				LevelCreator.createLevelOne(this);
 				break;
 				
 		}
@@ -64,6 +83,7 @@ public class World {
 	public void restartLevel() {
 		kisa = new Kisa(this);
 		loadLevel();
+		loadAnimations();
 	}
 	
 	public void loadAnimations() {

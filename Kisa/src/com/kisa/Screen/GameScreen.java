@@ -70,7 +70,7 @@ public class GameScreen implements Screen {
 			gameHub.restartLevel();			
 		
 		if(!gamePaused() && !world.kisa.isDead())
-			world.kisa.update(deltaTime, goLeft, goRight, goRun, goUp);
+			world.updateAnimations(deltaTime, goLeft, goRight, goRun, goUp);
 
 		camera.position.x = world.kisa.position.x;
 		camera.position.y = world.kisa.position.y; //add this to move camera up and down
